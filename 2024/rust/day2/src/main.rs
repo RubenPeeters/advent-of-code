@@ -15,34 +15,9 @@ fn part_one() {
                     .filter_map(|s| s.parse().ok())
                     .collect();
 
-                // Process each line of numbers here
-                if numbers.len() < 2 {
-                    continue;
+                if is_valid_sequence(&numbers) {
+                    monotonic_count += 1;
                 }
-
-                let mut is_increasing = true;
-                let mut is_decreasing = true;
-
-                for i in 1..numbers.len() {
-                    let diff = (numbers[i] - numbers[i - 1]).abs();
-                    if diff < 1 || diff > 3 {
-                        is_increasing = false;
-                        is_decreasing = false;
-                        break; // No need to check further if we find an invalid difference
-                    }
-                    if numbers[i] <= numbers[i - 1] {
-                        is_increasing = false;
-                    }
-                    if numbers[i] >= numbers[i - 1] {
-                        is_decreasing = false;
-                    }
-                }
-
-                if !is_increasing && !is_decreasing {
-                    continue;
-                }
-
-                monotonic_count += 1;
             }
             println!("Total safe sequences: {}", monotonic_count);
         }

@@ -1,10 +1,40 @@
 use std::collections::{HashMap, VecDeque};
 use std::env;
 use std::fs;
+use std::fs::File;
+use std::io::{self, Write};
 use std::process;
 
 fn get_middle_index(vec: &Vec<i32>) -> usize {
     vec.len() / 2 // For even lengths this gives the right middle index
+}
+
+fn visualize_dag(map: &HashMap<i32, HashMap<String, Vec<i32>>>) {
+    println!("DAG Visualization:");
+    for (&node, relationships) in map {
+        if let Some(should_be_after) = relationships.get("after") {
+            for &after_node in should_be_after {
+                println!("{} -> {}", node, after_node);
+            }
+        }
+    }
+}
+
+fn generate_dot_file(
+    map: &HashMap<i32, HashMap<String, Vec<i32>>>,
+    filename: &str,
+) -> io::Result<()> {
+    let mut file = File::create(filename)?;
+    writeln!(file, "digraph G {{")?;
+    for (&node, relationships) in map {
+        if let Some(should_be_after) = relationships.get("after") {
+            for &after_node in should_be_after {
+                writeln!(file, "    {} -> {};", node, after_node)?;
+            }
+        }
+    }
+    writeln!(file, "}}")?;
+    Ok(())
 }
 
 fn check_sequence(numbers: &Vec<i32>, map: &HashMap<i32, HashMap<String, Vec<i32>>>) -> bool {
@@ -207,6 +237,8 @@ fn part_two(filename: &str) {
             map.insert(num2, inner_map);
         }
     }
+    let dot_filename = format!("{}.dot", filename);
+    generate_dot_file(&map, &dot_filename).expect("Failed to generate DOT file");
 
     // Read the second section (after empty line)
     let second_section = contents
